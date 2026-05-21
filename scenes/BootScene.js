@@ -26,26 +26,74 @@ class BootScene extends Phaser.Scene {
   }
 
   _createPlayer() {
+    // 56×28 sprite, default orientation = facing RIGHT
+    // Layout: [PERSON x=0-22] [HANDLES x=20-32] [MOWER x=30-56]
     const g = this.make.graphics({ x: 0, y: 0, add: false });
+
+    // ── MOWER (x=30–56) ──────────────────────────────────────────
     // Wheels
-    g.fillStyle(0x222222);
-    g.fillRect(0, 4,  7, 7);
-    g.fillRect(0, 21, 7, 7);
-    g.fillRect(25, 4,  7, 7);
-    g.fillRect(25, 21, 7, 7);
-    // Body
+    g.fillStyle(0x111111);
+    g.fillRect(30, 1,  8, 7);
+    g.fillRect(30, 20, 8, 7);
+    g.fillRect(48, 1,  8, 7);
+    g.fillRect(48, 20, 8, 7);
+    // Deck body
     g.fillStyle(0xd4620a);
-    g.fillRect(5, 6, 22, 20);
+    g.fillRect(32, 2, 24, 24);
     // Blade housing
     g.fillStyle(0xa84e08);
-    g.fillRect(8, 10, 16, 12);
+    g.fillRect(34, 5, 18, 18);
     // Blade glint
-    g.fillStyle(0xeeeeee, 0.6);
-    g.fillRect(12, 13, 8, 2);
-    // Handlebar
-    g.fillStyle(0x777777);
-    g.fillRect(2, 13, 6, 6);
-    g.generateTexture('player', 32, 32);
+    g.fillStyle(0xeeeeee, 0.45);
+    g.fillRect(38, 12, 9, 2);
+    // Engine nub
+    g.fillStyle(0x444444);
+    g.fillRect(50, 9, 5, 10);
+
+    // ── HANDLES ──────────────────────────────────────────────────
+    g.fillStyle(0x555555);
+    g.fillRect(17, 9,  15, 3);
+    g.fillRect(17, 16, 15, 3);
+
+    // ── PERSON ───────────────────────────────────────────────────
+    // Blue shirt / torso (below head)
+    g.fillStyle(0x1a3a99);
+    g.fillEllipse(9, 21, 16, 10);
+
+    // Arms reaching forward (skin tone)
+    g.fillStyle(0xcc8855);
+    g.fillRect(9, 8,  12, 4);
+    g.fillRect(9, 16, 12, 4);
+
+    // Head — base dark hair fills the whole circle
+    g.fillStyle(0x150800);   // near-black dark brown hair
+    g.fillCircle(9, 13, 9);
+
+    // Face — skin ellipse on the RIGHT (front/leading) side of head
+    g.fillStyle(0xd4956a);
+    g.fillEllipse(13, 13, 9, 11);
+
+    // Redraw hair over the left/back of head to reclaim that area
+    g.fillStyle(0x150800);
+    g.fillCircle(4, 11, 5);   // back of head
+    g.fillRect(3, 4, 9, 4);   // top of hair
+    g.fillRect(3, 18, 5, 3);  // hair behind ear
+
+    // Dark beard — lower face area (right-front portion)
+    g.fillStyle(0x0d0400);
+    g.fillRect(11, 16, 7, 4);  // main beard band
+    g.fillRect(12, 14, 5, 3);  // upper stubble
+
+    // Eyes (small dark dots on face)
+    g.fillStyle(0x111122);
+    g.fillRect(12, 10, 2, 2);
+    g.fillRect(15, 10, 2, 2);
+
+    // Nose (tiny highlight)
+    g.fillStyle(0xaa6030);
+    g.fillRect(15, 13, 2, 2);
+
+    g.generateTexture('player', 56, 28);
     g.destroy();
   }
 

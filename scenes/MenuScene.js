@@ -36,8 +36,8 @@ class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Instruction box
-    this.add.rectangle(400, 390, 540, 90, 0x000000, 0.5);
-    this.add.text(400, 390, 'WASD / ARROWS  -  Move mower\nRun over bunnies to score points\nReach kill quota before time runs out', {
+    this.add.rectangle(400, 385, 540, 90, 0x000000, 0.5);
+    this.add.text(400, 385, 'DRAG JOYSTICK  -  Move mower\nRun over bunnies to score points\nKill all bunnies before time runs out', {
       fontSize: '10px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#bbbbbb',
@@ -47,17 +47,62 @@ class MenuScene extends Phaser.Scene {
       lineSpacing: 10,
     }).setOrigin(0.5);
 
-    const prompt = this.add.text(400, 510, 'PRESS ENTER TO START', {
-      fontSize: '13px',
+    // ── Fullscreen button (top-right) ──────────────────────────────
+    const fsBg = this.add.rectangle(718, 32, 158, 36, 0x222222, 0.88)
+      .setInteractive({ useHandCursor: true }).setDepth(20);
+    const fsLabel = this.add.text(718, 32, '[ FULLSCREEN ]', {
+      fontSize: '9px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
-      color: '#ffff00',
-      stroke: '#000000',
+      color: '#aaaaaa',
+    }).setOrigin(0.5).setDepth(21);
+
+    fsBg.on('pointerover',  () => fsLabel.setColor('#ffffff'));
+    fsBg.on('pointerout',   () => fsLabel.setColor('#aaaaaa'));
+    fsBg.on('pointerdown',  () => {
+      if (this.scale.isFullscreen) {
+        this.scale.stopFullscreen();
+        fsLabel.setText('[ FULLSCREEN ]');
+      } else {
+        this.scale.startFullscreen();
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+        fsLabel.setText('[EXIT FULLSCR ]');
+      }
+    });
+
+    // ── TAP TO START button ────────────────────────────────────────
+    let started = false;
+    const startGame = () => {
+      if (started) return;
+      started = true;
+      this.scene.start('Game', { levelIndex: 0, totalScore: 0 });
+    };
+
+    const btnBg = this.add.rectangle(400, 500, 360, 56, 0x228822, 0.92)
+      .setInteractive({ useHandCursor: true }).setDepth(20);
+    this.add.rectangle(400, 500, 356, 52, 0x000000, 0)
+      .setStrokeStyle(2, 0x44ff44, 0.7).setDepth(21);
+
+    const btnText = this.add.text(400, 500, '▶  TAP TO START', {
+      fontSize: '16px',
+      fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#ffffff',
+      stroke: '#003300',
       strokeThickness: 3,
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(22);
 
-    this.tweens.add({ targets: prompt, alpha: 0, duration: 550, yoyo: true, repeat: -1 });
+    this.tweens.add({ targets: [btnBg, btnText], alpha: 0.6, duration: 550, yoyo: true, repeat: -1 });
 
-    this.input.keyboard.once('keydown-ENTER', () => this.scene.start('Game', { levelIndex: 0, totalScore: 0 }));
-    this.input.keyboard.once('keydown-SPACE', () => this.scene.start('Game', { levelIndex: 0, totalScore: 0 }));
+    btnBg.on('pointerdown', startGame);
+
+    this.add.text(400, 558, 'or press ENTER on keyboard', {
+      fontSize: '8px',
+      fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#666666',
+    }).setOrigin(0.5).setDepth(20);
+
+    this.input.keyboard.once('keydown-ENTER', startGame);
+    this.input.keyboard.once('keydown-SPACE', startGame);
   }
 }
