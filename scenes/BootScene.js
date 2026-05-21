@@ -2,12 +2,10 @@ class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   preload() {
-    // ── Custom bonus-round art ─────────────────────────────────────
-    // HOW TO IMPORT YOUR OWN PHOTO:
-    //   1. Copy your image file into the bunny-slayer folder and
-    //      name it  bonus_art.png  (JPG also works — change extension below).
-    //   2. Uncomment the line below. That's it.
     this.load.image('bonus_art', 'bonus_art.jpg');
+    this.load.on('loaderror', (file) => {
+      console.warn('Failed to load:', file.src);
+    });
   }
 
   create() {

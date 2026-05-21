@@ -184,8 +184,8 @@ class GameScene extends Phaser.Scene {
     // Image below text
     let artEl;
     if (this.textures.exists('bonus_art')) {
-      artEl = this.add.image(270, 580, 'bonus_art')
-                .setDepth(D+2).setAlpha(0).setDisplaySize(460, 220);
+      artEl = this.add.image(270, 590, 'bonus_art')
+                .setDepth(D+2).setAlpha(0).setDisplaySize(260, 330);
     } else {
       artEl = this.add.rectangle(270, 580, 460, 220, 0x112244, 0.9)
                 .setDepth(D+2).setAlpha(0);
