@@ -10,8 +10,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Sprite is 56×28 (person left, mower right). Keep a compact square
     // hitbox centred on the mower deck so collisions feel accurate.
-    this.setBodySize(24, 22);
-    this.setOffset(30, 3);
+    this.setBodySize(36, 33);
+    this.setOffset(45, 4);
 
     this.cursors = scene.input.keyboard.createCursorKeys();
     this.wasd = scene.input.keyboard.addKeys({

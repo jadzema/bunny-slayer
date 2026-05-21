@@ -7,19 +7,19 @@ class GameOverScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(400, 300, 'grass');
-    this.add.rectangle(400, 300, 800, 600, 0x000000, 0.78);
+    this.add.image(480, 270, 'grass');
+    this.add.rectangle(480, 270, 960, 540, 0x000000, 0.78);
 
     // Blood splatters for decoration
     for (let i = 0; i < 5; i++) {
       this.add.image(
-        Phaser.Math.Between(80, 720),
-        Phaser.Math.Between(80, 520),
+        Phaser.Math.Between(80, 880),
+        Phaser.Math.Between(80, 460),
         'splat'
       ).setScale(Phaser.Math.FloatBetween(1.5, 3)).setAlpha(0.3);
     }
 
-    this.add.text(400, 140, 'GAME OVER', {
+    this.add.text(480, 110, 'GAME OVER', {
       fontSize: '50px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ff2222',
@@ -27,7 +27,7 @@ class GameOverScene extends Phaser.Scene {
       strokeThickness: 7,
     }).setOrigin(0.5);
 
-    this.add.text(400, 240, `LEVEL ${LEVELS[this.levelIndex].level}`, {
+    this.add.text(480, 210, `LEVEL ${LEVELS[this.levelIndex].level}`, {
       fontSize: '18px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#888888',
@@ -35,7 +35,7 @@ class GameOverScene extends Phaser.Scene {
       strokeThickness: 2,
     }).setOrigin(0.5);
 
-    this.add.text(400, 300, `SCORE: ${this.totalScore}`, {
+    this.add.text(480, 275, `SCORE: ${this.totalScore}`, {
       fontSize: '22px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffff44',
@@ -43,7 +43,7 @@ class GameOverScene extends Phaser.Scene {
       strokeThickness: 3,
     }).setOrigin(0.5);
 
-    this.add.text(400, 390, 'ENTER / R  -  TRY AGAIN', {
+    this.add.text(480, 360, 'ENTER / R  -  TRY AGAIN', {
       fontSize: '12px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffffff',
@@ -51,7 +51,7 @@ class GameOverScene extends Phaser.Scene {
       strokeThickness: 2,
     }).setOrigin(0.5);
 
-    this.add.text(400, 440, 'M  -  MAIN MENU', {
+    this.add.text(480, 410, 'M  -  MAIN MENU', {
       fontSize: '12px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#aaaaaa',

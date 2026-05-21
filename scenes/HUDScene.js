@@ -11,7 +11,7 @@ class HUDScene extends Phaser.Scene {
 
   create() {
     // Background bar
-    this.add.rectangle(400, 22, 800, 44, 0x000000, 0.72);
+    this.add.rectangle(480, 22, 960, 44, 0x000000, 0.72);
 
     this.levelText = this.add.text(16, 10, `LEVEL ${this.levelNum}`, {
       fontSize: '11px',
@@ -21,7 +21,7 @@ class HUDScene extends Phaser.Scene {
       strokeThickness: 2,
     });
 
-    this.scoreText = this.add.text(200, 10, `SCORE: ${this.totalScore}`, {
+    this.scoreText = this.add.text(240, 10, `SCORE: ${this.totalScore}`, {
       fontSize: '11px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffff44',
@@ -29,7 +29,7 @@ class HUDScene extends Phaser.Scene {
       strokeThickness: 2,
     });
 
-    this.killsText = this.add.text(430, 10, `BUNNIES: ${this.kills}/${this.required}`, {
+    this.killsText = this.add.text(530, 10, `BUNNIES: ${this.kills}/${this.required}`, {
       fontSize: '11px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#aaffaa',
@@ -37,7 +37,7 @@ class HUDScene extends Phaser.Scene {
       strokeThickness: 2,
     });
 
-    this.timerText = this.add.text(720, 8, `${this.timeLeft}`, {
+    this.timerText = this.add.text(900, 8, `${this.timeLeft}`, {
       fontSize: '15px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffffff',

@@ -15,85 +15,72 @@ class BootScene extends Phaser.Scene {
   _createGrass() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
     const colors = [0x4a7c3f, 0x3d6b34, 0x518840, 0x467538];
-    for (let ty = 0; ty < 600; ty += 16) {
-      for (let tx = 0; tx < 800; tx += 16) {
+    for (let ty = 0; ty < 540; ty += 16) {
+      for (let tx = 0; tx < 960; tx += 16) {
         g.fillStyle(colors[((tx / 16 + ty / 16) % 4)]);
         g.fillRect(tx, ty, 16, 16);
       }
     }
-    g.generateTexture('grass', 800, 600);
+    g.generateTexture('grass', 960, 540);
     g.destroy();
   }
 
   _createPlayer() {
-    // 56×28 sprite, default orientation = facing RIGHT
-    // Layout: [PERSON x=0-22] [HANDLES x=20-32] [MOWER x=30-56]
+    // 84×42 sprite (1.5× scale), default orientation = facing RIGHT
+    // Layout: [PERSON x=0-33] [HANDLES x=25-47] [MOWER x=45-84]
     const g = this.make.graphics({ x: 0, y: 0, add: false });
 
-    // ── MOWER (x=30–56) ──────────────────────────────────────────
-    // Wheels
+    // ── MOWER (x=45–84) ──────────────────────────────────────────
     g.fillStyle(0x111111);
-    g.fillRect(30, 1,  8, 7);
-    g.fillRect(30, 20, 8, 7);
-    g.fillRect(48, 1,  8, 7);
-    g.fillRect(48, 20, 8, 7);
-    // Deck body
+    g.fillRect(45, 1,  12, 10);
+    g.fillRect(45, 30, 12, 10);
+    g.fillRect(72, 1,  12, 10);
+    g.fillRect(72, 30, 12, 10);
     g.fillStyle(0xd4620a);
-    g.fillRect(32, 2, 24, 24);
-    // Blade housing
+    g.fillRect(48, 3, 36, 36);
     g.fillStyle(0xa84e08);
-    g.fillRect(34, 5, 18, 18);
-    // Blade glint
+    g.fillRect(51, 7, 27, 27);
     g.fillStyle(0xeeeeee, 0.45);
-    g.fillRect(38, 12, 9, 2);
-    // Engine nub
+    g.fillRect(57, 18, 13, 3);
     g.fillStyle(0x444444);
-    g.fillRect(50, 9, 5, 10);
+    g.fillRect(75, 13, 7, 15);
 
     // ── HANDLES ──────────────────────────────────────────────────
     g.fillStyle(0x555555);
-    g.fillRect(17, 9,  15, 3);
-    g.fillRect(17, 16, 15, 3);
+    g.fillRect(25, 13, 22, 4);
+    g.fillRect(25, 24, 22, 4);
 
     // ── PERSON ───────────────────────────────────────────────────
-    // Blue shirt / torso (below head)
     g.fillStyle(0x1a3a99);
-    g.fillEllipse(9, 21, 16, 10);
+    g.fillEllipse(13, 32, 24, 15);
 
-    // Arms reaching forward (skin tone)
     g.fillStyle(0xcc8855);
-    g.fillRect(9, 8,  12, 4);
-    g.fillRect(9, 16, 12, 4);
+    g.fillRect(13, 12, 18, 6);
+    g.fillRect(13, 24, 18, 6);
 
-    // Head — base dark hair fills the whole circle
-    g.fillStyle(0x150800);   // near-black dark brown hair
-    g.fillCircle(9, 13, 9);
-
-    // Face — skin ellipse on the RIGHT (front/leading) side of head
-    g.fillStyle(0xd4956a);
-    g.fillEllipse(13, 13, 9, 11);
-
-    // Redraw hair over the left/back of head to reclaim that area
     g.fillStyle(0x150800);
-    g.fillCircle(4, 11, 5);   // back of head
-    g.fillRect(3, 4, 9, 4);   // top of hair
-    g.fillRect(3, 18, 5, 3);  // hair behind ear
+    g.fillCircle(13, 19, 13);
 
-    // Dark beard — lower face area (right-front portion)
+    g.fillStyle(0xd4956a);
+    g.fillEllipse(19, 19, 13, 16);
+
+    g.fillStyle(0x150800);
+    g.fillCircle(6,  16, 7);
+    g.fillRect(4,  6,  13, 6);
+    g.fillRect(4,  27, 7,  4);
+
     g.fillStyle(0x0d0400);
-    g.fillRect(11, 16, 7, 4);  // main beard band
-    g.fillRect(12, 14, 5, 3);  // upper stubble
+    g.fillRect(16, 24, 10, 6);
+    g.fillRect(18, 21, 7,  4);
 
-    // Eyes (small dark dots on face)
     g.fillStyle(0x111122);
-    g.fillRect(12, 10, 2, 2);
-    g.fillRect(15, 10, 2, 2);
+    g.fillRect(18, 15, 3, 3);
+    g.fillRect(22, 15, 3, 3);
 
-    // Nose (tiny highlight)
     g.fillStyle(0xaa6030);
-    g.fillRect(15, 13, 2, 2);
+    g.fillRect(22, 19, 3, 3);
 
-    g.generateTexture('player', 56, 28);
+    g.generateTexture('player', 84, 42);
     g.destroy();
   }
 
