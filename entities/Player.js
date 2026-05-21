@@ -1,15 +1,25 @@
 class Player extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y) {
-    super(scene, x, y, 'player');
+  // mowerTier: 0 = walk-behind (default), 1 = ride-on, 2 = zero-turn
+  constructor(scene, x, y, mowerTier = 0) {
+    const key = mowerTier === 2 ? 'player_tier2'
+              : mowerTier === 1 ? 'player_tier1'
+              : 'player';
+    super(scene, x, y, key);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    this.mowerTier = mowerTier;
     this.setCollideWorldBounds(true);
     this.setDepth(10);
-    this.speed = 150;
+
+    // Tier 1 & 2: 25% faster than base
+    this.speed = (mowerTier >= 1) ? 187 : 150;
 
     this.setBodySize(36, 33);
     this.setOffset(45, 4);
+
+    // Smooth rotation tracking (used for tier-1 turn dampening)
+    this._facingAngle = 0;
 
     this.cursors = scene.input.keyboard.createCursorKeys();
     this.wasd = scene.input.keyboard.addKeys({
@@ -43,7 +53,18 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(vx, vy);
 
     if (vx !== 0 || vy !== 0) {
-      this.setRotation(Math.atan2(vy, vx));
+      const targetAngle = Math.atan2(vy, vx);
+      if (this.mowerTier === 1) {
+        // Ride-on: 25% slower turning — lerp toward target angle
+        let diff = targetAngle - this._facingAngle;
+        while (diff >  Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        this._facingAngle += diff * 0.10;
+      } else {
+        // Walk-behind & zero-turn: instant rotation
+        this._facingAngle = targetAngle;
+      }
+      this.setRotation(this._facingAngle);
     }
 
     const moving = vx !== 0 || vy !== 0;

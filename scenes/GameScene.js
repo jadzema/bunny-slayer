@@ -2,43 +2,69 @@ class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
 
   init(data) {
-    this.levelIndex = data.levelIndex  || 0;
-    this.totalScore = data.totalScore  || 0;
+    this.levelIndex          = data.levelIndex          || 0;
+    this.totalScore          = data.totalScore          || 0;
+    this.nightMode           = data.nightMode           || false;
+    this.mowerTier           = data.mowerTier           || 0;
+    this.nightModesCompleted = data.nightModesCompleted || 0;
+    this.eagleAvailable      = data.eagleAvailable      || false;
+    this.eagleUsed           = data.eagleUsed           || false;
   }
 
   create() {
-    this.cfg         = LEVELS[this.levelIndex];
-    this.score       = 0;
-    this.kills       = 0;
-    this.over        = false;
-    this.timeLeft    = this.cfg.timeLimit;
+    this.cfg          = LEVELS[this.levelIndex];
+    this.score        = 0;
+    this.kills        = 0;
+    this.over         = false;
+    this.timeLeft     = this.cfg.timeLimit;
     this.totalBunnies = this.cfg.bunnies;
+    this.patchCollected = false;
 
-    // Background
+    // Background grass
     this.add.image(270, 480, 'grass');
 
-    // Fence border (visual only)
-    this._drawFences();
+    // Night mode — dark sky + stars + moon
+    if (this.nightMode) {
+      this.add.rectangle(270, 480, 540, 960, 0x000033, 0.62).setDepth(0);
+      for (let i = 0; i < 38; i++) {
+        const sx   = Phaser.Math.Between(20, 520);
+        const sy   = Phaser.Math.Between(50, 920);
+        const star = this.add.circle(sx, sy,
+          Phaser.Math.Between(1, 2), 0xffffff,
+          Phaser.Math.FloatBetween(0.3, 0.9)).setDepth(0);
+        this.tweens.add({ targets: star, alpha: 0.1,
+          duration: Phaser.Math.Between(500, 2000), yoyo: true, repeat: -1 });
+      }
+      // Crescent moon
+      this.add.circle(450, 90, 30, 0xffffd0, 0.9).setDepth(0);
+      this.add.circle(440, 84, 22, 0x000044, 1).setDepth(0);
+    }
 
-    // Physics bounds inset from fence
+    this._drawFences();
     this.physics.world.setBounds(26, 26, 488, 908);
 
-    // Static obstacles
     this.obstacles = this.physics.add.staticGroup();
     this._spawnObstacles();
 
-    // Player
-    this.player = new Player(this, 270, 480);
+    this.player = new Player(this, 270, 480, this.mowerTier);
     this.physics.add.collider(this.player, this.obstacles);
 
-    // Bunnies
     this.bunnies = this.physics.add.group();
     this._spawnBunnies();
 
     this.physics.add.collider(this.bunnies, this.obstacles);
     this.physics.add.overlap(this.player, this.bunnies, this._killBunny, null, this);
 
-    // Countdown timer
+    // Grass patch on levels 3, 6, 9 (0-indexed: 2, 5, 8)
+    if ([2, 5, 8].includes(this.levelIndex)) {
+      this._spawnGrassPatch();
+    }
+
+    // Eagle button (one-time use, earned after 3rd night mode)
+    if (this.eagleAvailable && !this.eagleUsed) {
+      this._createEagleButton();
+    }
+
     this.timerEvent = this.time.addEvent({
       delay: 1000,
       callback: this._tick,
@@ -46,7 +72,6 @@ class GameScene extends Phaser.Scene {
       repeat: this.cfg.timeLimit - 1,
     });
 
-    // Launch HUD overlay — show kills vs total bunnies
     this.scene.launch('HUD', {
       score:     this.totalScore,
       kills:     0,
@@ -56,6 +81,153 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  // ── Grass patch ──────────────────────────────────────────────────
+  _spawnGrassPatch() {
+    let px, py, tries = 0;
+    do {
+      px = Phaser.Math.Between(80, 440);
+      py = Phaser.Math.Between(80, 860);
+      tries++;
+    } while (Phaser.Math.Distance.Between(px, py, 270, 480) < 120 && tries < 30);
+
+    this._patch = this.physics.add.staticImage(px, py, 'grass_patch').setDepth(3);
+    this._patch.refreshBody();
+
+    // Pulsing glow halo
+    this._patchGlow = this.add.rectangle(px, py, 90, 48, 0x88ff88, 0.3).setDepth(2);
+    this.tweens.add({ targets: this._patchGlow, alpha: 0.75, duration: 600, yoyo: true, repeat: -1 });
+
+    this.physics.add.overlap(this.player, this._patch, this._onPatchHit, null, this);
+
+    // Auto-remove after 10 seconds if not collected
+    this._patchTimer = this.time.delayedCall(10000, () => this._removePatch());
+  }
+
+  _removePatch() {
+    if (this._patch && this._patch.active) { this._patch.destroy(); this._patch = null; }
+    if (this._patchGlow) { this._patchGlow.destroy(); this._patchGlow = null; }
+    if (this._patchTimer) { this._patchTimer.remove(); this._patchTimer = null; }
+  }
+
+  _onPatchHit() {
+    if (!this._patch || !this._patch.active) return;
+    const px = this._patch.x, py = this._patch.y;
+    this._removePatch();
+    this.patchCollected = true;
+    this._spawnBabyBunnies(px, py);
+    this._showNightMowGraphic();
+  }
+
+  // ── Baby bunnies (bonus, 30% scale, auto-die after 2.5 s) ────────
+  _spawnBabyBunnies(cx, cy) {
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const baby  = new Bunny(this, cx, cy, { bunnySpeed: 130, aiMode: 'WANDER' });
+      baby.setScale(0.3);
+      baby.isBaby = true;
+      this.bunnies.add(baby);
+      baby.setVelocity(Math.cos(angle) * 170, Math.sin(angle) * 170);
+      this.time.delayedCall(2500, () => { if (baby.alive) baby.die(this); });
+    }
+  }
+
+  // ── Night Mow Bonus Round overlay ───────────────────────────────
+  _showNightMowGraphic() {
+    const D = 40;
+    const bg   = this.add.rectangle(270, 480, 540, 960, 0x000000, 0).setDepth(D);
+    const panel= this.add.rectangle(270, 430, 490, 340, 0x000022, 0).setDepth(D+1);
+    const rim  = this.add.rectangle(270, 430, 494, 344, 0x000000, 0)
+                   .setStrokeStyle(2, 0x4444ff, 0).setDepth(D+1);
+
+    const moon = this.add.circle(270, 310, 36, 0xffffd0, 0).setDepth(D+2);
+    this.add.circle(258, 302, 26, 0x000022, 0).setDepth(D+3); // crescent cut-out
+
+    const title = this.add.text(270, 368, 'NIGHT MOW', {
+      fontSize: '22px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#aaaaff', stroke: '#000033', strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+
+    const sub = this.add.text(270, 408, 'BONUS ROUND!', {
+      fontSize: '18px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#ffff44', stroke: '#000000', strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+
+    // Custom image or placeholder
+    let artEl;
+    if (this.textures.exists('bonus_art')) {
+      artEl = this.add.image(270, 490, 'bonus_art')
+                .setDepth(D+2).setAlpha(0).setDisplaySize(260, 130);
+    } else {
+      artEl = this.add.rectangle(270, 490, 260, 130, 0x112244, 0.9).setDepth(D+2).setAlpha(0);
+      this.add.text(270, 490,
+        'Add bonus_art.png\nto bunny-slayer folder\nand uncomment preload()',
+        { fontSize: '8px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+          color: '#4466aa', align: 'center', lineSpacing: 6 }
+      ).setOrigin(0.5).setDepth(D+3).setAlpha(0);
+    }
+
+    const all = [bg, panel, rim, moon, title, sub, artEl];
+    this.tweens.add({
+      targets: all, alpha: 1, duration: 500,
+      onComplete: () => {
+        this.time.delayedCall(3200, () => {
+          this.tweens.add({
+            targets: all, alpha: 0, duration: 700,
+            onComplete: () => all.forEach(o => o && o.destroy()),
+          });
+        });
+      },
+    });
+  }
+
+  // ── Eagle button ─────────────────────────────────────────────────
+  _createEagleButton() {
+    const ex = 270, ey = 895;
+    this._eagleBtn  = this.add.circle(ex, ey, 38, 0x002266, 0.9).setDepth(52)
+                        .setInteractive({ useHandCursor: true });
+    this.add.circle(ex, ey, 38, 0x000000, 0)
+      .setStrokeStyle(2, 0xffffff, 0.5).setDepth(52);
+    this._eagleLbl  = this.add.text(ex, ey - 6, '🦅', { fontSize: '22px' })
+                        .setOrigin(0.5).setDepth(53);
+    this._eagleSub  = this.add.text(ex, ey + 14, 'EAGLE', {
+      fontSize: '7px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#ffffff',
+    }).setOrigin(0.5).setDepth(53);
+
+    const fire = () => {
+      if (this.eagleUsed) return;
+      this.eagleUsed = true;
+      this._eagleBtn.destroy(); this._eagleLbl.destroy(); this._eagleSub.destroy();
+      this._releaseEagles();
+    };
+    this._eagleBtn.on('pointerdown', fire);
+    this.input.keyboard.on('keydown-E', fire);
+  }
+
+  _releaseEagles() {
+    const targets = this.bunnies.getChildren().filter(b => b.alive).slice(0, 3);
+    targets.forEach((target, i) => {
+      this.time.delayedCall(i * 750, () => {
+        if (!target.alive) return;
+        const fromLeft = (i % 2 === 0);
+        const startX = fromLeft ? -40 : 580;
+        const startY = Phaser.Math.Between(150, 700);
+        const eagle  = this.add.image(startX, startY, 'eagle').setDepth(15).setScale(1.6);
+        this.tweens.add({
+          targets: eagle, x: target.x, y: target.y, duration: 750, ease: 'Power2.In',
+          onComplete: () => {
+            if (target.alive) this._killBunny(this.player, target);
+            this.tweens.add({
+              targets: eagle, x: fromLeft ? 580 : -40, y: -60, duration: 600,
+              ease: 'Power2.Out', onComplete: () => eagle.destroy(),
+            });
+          },
+        });
+      });
+    });
+  }
+
+  // ── Standard scene methods ────────────────────────────────────────
   _drawFences() {
     for (let x = 0; x < 540; x += 32) {
       this.add.image(x + 16, 13,  'fence_h').setDepth(1);
@@ -70,7 +242,6 @@ class GameScene extends Phaser.Scene {
   _spawnObstacles() {
     const count = this.cfg.obstacles;
     const types = ['tree', 'rock', 'rock', 'tree'];
-
     for (let i = 0; i < count; i++) {
       let x, y, tries = 0;
       do {
@@ -78,19 +249,14 @@ class GameScene extends Phaser.Scene {
         y = Phaser.Math.Between(70, 890);
         tries++;
       } while (Phaser.Math.Distance.Between(x, y, 270, 480) < 110 && tries < 30);
-
-      const type = Phaser.Utils.Array.GetRandom(types);
-      const obs  = this.obstacles.create(x, y, type);
-      obs.setDepth(3);
-      obs.setImmovable(true);
-      obs.refreshBody();
+      const obs = this.obstacles.create(x, y, Phaser.Utils.Array.GetRandom(types));
+      obs.setDepth(3).setImmovable(true).refreshBody();
     }
   }
 
   _spawnBunnies() {
     const { bunnies: count, bunnySpeed, aiMode } = this.cfg;
     const placed = [];
-
     for (let i = 0; i < count; i++) {
       let x, y, tries = 0;
       do {
@@ -101,10 +267,8 @@ class GameScene extends Phaser.Scene {
         Phaser.Math.Distance.Between(x, y, 270, 480) < 90 ||
         placed.some(p => Phaser.Math.Distance.Between(x, y, p.x, p.y) < 44)
       ));
-
       placed.push({ x, y });
-      const bunny = new Bunny(this, x, y, { bunnySpeed, aiMode });
-      this.bunnies.add(bunny);
+      this.bunnies.add(new Bunny(this, x, y, { bunnySpeed, aiMode }));
     }
   }
 
@@ -112,16 +276,16 @@ class GameScene extends Phaser.Scene {
     if (!bunny.alive) return;
     bunny.die(this);
 
-    this.kills++;
-    this.score += 100;
-
-    this.events.emit('kills-update', this.kills);
+    // Baby bunnies give bonus score but don't count toward the level quota
+    if (!bunny.isBaby) {
+      this.kills++;
+      this.events.emit('kills-update', this.kills);
+    }
+    this.score += bunny.isBaby ? 50 : 100;
     this.events.emit('score-update', this.totalScore + this.score);
-
     this.cameras.main.shake(90, 0.006);
 
-    // Win only when every last bunny is dead
-    if (this.kills >= this.totalBunnies) {
+    if (!bunny.isBaby && this.kills >= this.totalBunnies) {
       this._endLevel(true);
     }
   }
@@ -129,9 +293,7 @@ class GameScene extends Phaser.Scene {
   _tick() {
     this.timeLeft--;
     this.events.emit('time-update', this.timeLeft);
-
     if (this.timeLeft <= 0) {
-      // Win if quota met, lose if not
       this._endLevel(this.kills >= this.cfg.required);
     }
   }
@@ -139,26 +301,36 @@ class GameScene extends Phaser.Scene {
   _endLevel(won) {
     if (this.over) return;
     this.over = true;
-
     GameAudio.stopMower();
     this.timerEvent.remove(false);
     this.physics.pause();
 
+    const sharedState = {
+      mowerTier:           this.mowerTier,
+      nightModesCompleted: this.nightModesCompleted,
+      eagleAvailable:      this.eagleAvailable,
+      eagleUsed:           this.eagleUsed,
+      nightModeCompleted:  this.nightMode && won,
+    };
+
     this.time.delayedCall(500, () => {
       this.scene.stop('HUD');
       if (won) {
-        const timeBonus = this.timeLeft * 10;
         this.scene.start('LevelComplete', {
-          levelIndex: this.levelIndex,
-          score:      this.score,
-          totalScore: this.totalScore + this.score,
-          timeBonus,
-          perfect:    this.kills >= this.totalBunnies,
+          levelIndex:     this.levelIndex,
+          score:          this.score,
+          totalScore:     this.totalScore + this.score,
+          timeBonus:      this.timeLeft * 10,
+          perfect:        this.kills >= this.totalBunnies,
+          patchCollected: this.patchCollected,
+          ...sharedState,
         });
       } else {
         this.scene.start('GameOver', {
-          levelIndex: this.levelIndex,
-          totalScore: this.totalScore + this.score,
+          levelIndex:     this.levelIndex,
+          totalScore:     this.totalScore + this.score,
+          patchCollected: false,
+          ...sharedState,
         });
       }
     });

@@ -1,14 +1,27 @@
 class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
+  preload() {
+    // ── Custom bonus-round art ─────────────────────────────────────
+    // HOW TO IMPORT YOUR OWN PHOTO:
+    //   1. Copy your image file into the bunny-slayer folder and
+    //      name it  bonus_art.png  (JPG also works — change extension below).
+    //   2. Uncomment the line below. That's it.
+    // this.load.image('bonus_art', 'bonus_art.png');
+  }
+
   create() {
     this._createGrass();
     this._createPlayer();
+    this._createPlayerTier1();
+    this._createPlayerTier2();
     this._createBunny();
     this._createSplat();
     this._createTree();
     this._createRock();
     this._createFences();
+    this._createGrassPatch();
+    this._createEagle();
     this.scene.start('Menu');
   }
 
@@ -205,5 +218,162 @@ class BootScene extends Phaser.Scene {
     gv.fillRect(0, 0, 24, 7);
     gv.generateTexture('fence_v', 24, 32);
     gv.destroy();
+  }
+
+  // ── Tall-grass bonus patch ─────────────────────────────────────
+  _createGrassPatch() {
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    g.fillStyle(0x1a6b1a);
+    g.fillRect(0, 0, 84, 42);
+    // Hardcoded blade heights for a deterministic, lush look
+    const blades = [
+      { x:2,  h:22, c:0x22cc22 }, { x:9,  h:18, c:0x44ee44 }, { x:16, h:26, c:0x1faa1f },
+      { x:23, h:20, c:0x33dd33 }, { x:30, h:24, c:0x22cc22 }, { x:37, h:16, c:0x55ff55 },
+      { x:44, h:28, c:0x1faa1f }, { x:51, h:19, c:0x33dd33 }, { x:58, h:23, c:0x22cc22 },
+      { x:65, h:17, c:0x44ee44 }, { x:72, h:25, c:0x1faa1f }, { x:79, h:21, c:0x33dd33 },
+    ];
+    blades.forEach(b => { g.fillStyle(b.c); g.fillRect(b.x, 42 - b.h, 5, b.h); });
+    g.fillStyle(0xccffcc, 0.35);
+    g.fillRect(8, 4, 6, 3); g.fillRect(38, 6, 5, 3); g.fillRect(66, 3, 7, 3);
+    g.lineStyle(2, 0x88ff88, 0.9);
+    g.strokeRect(1, 1, 82, 40);
+    g.generateTexture('grass_patch', 84, 42);
+    g.destroy();
+  }
+
+  // ── Ride-on mower (tier 1) — same 84×42 canvas ────────────────
+  _createPlayerTier1() {
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    // Big rear wheels (back = left when facing right)
+    g.fillStyle(0x111111);
+    g.fillRect(0, 0, 16, 18); g.fillRect(0, 24, 16, 18);
+    g.fillStyle(0x2a2a2a);
+    g.fillRect(2, 3, 9, 12);  g.fillRect(2, 27, 9, 12);
+    // Small front wheels
+    g.fillStyle(0x111111);
+    g.fillRect(68, 7, 12, 12); g.fillRect(68, 23, 12, 12);
+    // Main body (amber-orange)
+    g.fillStyle(0xd4820a);
+    g.fillRect(16, 0, 52, 42);
+    // Engine hood (front-right, darker)
+    g.fillStyle(0xaa5c08);
+    g.fillRect(50, 3, 18, 36);
+    g.fillStyle(0x883d06);
+    g.fillRect(54, 7, 10, 28);
+    // Seat / driver platform
+    g.fillStyle(0x2a2a2a);
+    g.fillRect(18, 10, 28, 22);
+    // Person — dark hair
+    g.fillStyle(0x150800);
+    g.fillCircle(31, 21, 10);
+    g.fillRect(27, 13, 8, 5);
+    // Face (skin)
+    g.fillStyle(0xd4956a);
+    g.fillEllipse(31, 21, 9, 12);
+    // Beard
+    g.fillStyle(0x0d0400);
+    g.fillRect(28, 25, 7, 4);
+    // Eyes
+    g.fillStyle(0x111122);
+    g.fillRect(28, 19, 2, 2); g.fillRect(32, 19, 2, 2);
+    // Blue shirt shoulders
+    g.fillStyle(0x1a3a99);
+    g.fillRect(21, 29, 19, 8);
+    // Steering wheel
+    g.fillStyle(0x555555);
+    g.fillRect(40, 18, 12, 4); g.fillRect(43, 15, 4, 10);
+    // Body glint
+    g.fillStyle(0xeeaa44, 0.35);
+    g.fillRect(20, 3, 28, 3);
+    g.generateTexture('player_tier1', 84, 42);
+    g.destroy();
+  }
+
+  // ── Zero-turn mower (tier 2) ───────────────────────────────────
+  _createPlayerTier2() {
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    // Big rear wheels with tread
+    g.fillStyle(0x111111);
+    g.fillRect(0, 0, 18, 20); g.fillRect(0, 22, 18, 20);
+    g.fillStyle(0x2a2a2a);
+    g.fillRect(2, 3, 12, 14); g.fillRect(2, 25, 12, 14);
+    // Front caster wheels
+    g.fillStyle(0x222222);
+    g.fillRect(66, 9, 12, 10); g.fillRect(66, 23, 12, 10);
+    // Body (gold)
+    g.fillStyle(0xcc8800);
+    g.fillRect(18, 0, 48, 42);
+    // Cutting deck (lighter gold)
+    g.fillStyle(0xe09900);
+    g.fillRect(42, 2, 24, 38);
+    g.fillStyle(0xaa7000);
+    g.fillRect(46, 6, 3, 30); g.fillRect(52, 6, 3, 30); g.fillRect(58, 6, 3, 30);
+    // Driver platform
+    g.fillStyle(0x3a3a00);
+    g.fillRect(20, 10, 18, 22);
+    // Person — dark hair
+    g.fillStyle(0x150800);
+    g.fillCircle(29, 21, 10);
+    g.fillRect(25, 13, 8, 5);
+    // Face
+    g.fillStyle(0xd4956a);
+    g.fillEllipse(29, 21, 9, 12);
+    // Beard
+    g.fillStyle(0x0d0400);
+    g.fillRect(26, 25, 7, 4);
+    // Eyes
+    g.fillStyle(0x111122);
+    g.fillRect(26, 19, 2, 2); g.fillRect(30, 19, 2, 2);
+    // Blue shirt
+    g.fillStyle(0x1a3a99);
+    g.fillRect(21, 29, 16, 8);
+    // Zero-turn dual drive sticks (characteristic look)
+    g.fillStyle(0x888888);
+    g.fillRect(17, 12, 4, 18); g.fillRect(38, 12, 4, 18);
+    g.fillRect(17, 11, 8, 4);  g.fillRect(38, 11, 8, 4);
+    // Glint
+    g.fillStyle(0xffcc44, 0.3);
+    g.fillRect(20, 2, 20, 3);
+    g.generateTexture('player_tier2', 84, 42);
+    g.destroy();
+  }
+
+  // ── Bald eagle with flag cape (32×32) ─────────────────────────
+  _createEagle() {
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    // Wings (spread, top-down)
+    g.fillStyle(0x8b4513);
+    g.fillRect(0, 11, 14, 9); g.fillRect(18, 11, 14, 9);
+    g.fillStyle(0x4a2000);
+    g.fillRect(0, 12, 5, 7);  g.fillRect(27, 12, 5, 7);
+    g.fillStyle(0x5c2d0a);
+    g.fillRect(5, 11, 2, 9);  g.fillRect(11, 11, 2, 9);
+    g.fillRect(21, 11, 2, 9); g.fillRect(25, 11, 2, 9);
+    // Brown body
+    g.fillStyle(0x6b3a1a);
+    g.fillEllipse(16, 16, 10, 18);
+    // White head (bald eagle)
+    g.fillStyle(0xffffff);
+    g.fillCircle(16, 7, 6);
+    // Yellow beak
+    g.fillStyle(0xffaa00);
+    g.fillRect(19, 5, 4, 3);
+    // Eye
+    g.fillStyle(0x111111);
+    g.fillRect(15, 6, 2, 2);
+    // American-flag cape (tail)
+    g.fillStyle(0xdd1111);
+    g.fillRect(11, 23, 10, 8);
+    g.fillStyle(0xffffff);
+    g.fillRect(11, 25, 10, 2);
+    g.fillStyle(0xdd1111);
+    g.fillRect(11, 27, 10, 2);
+    g.fillStyle(0x0033cc);
+    g.fillRect(11, 23, 5, 4);
+    g.fillStyle(0xffffff);
+    g.fillRect(12, 24, 1, 1); g.fillRect(14, 24, 1, 1);
+    g.fillRect(12, 26, 1, 1); g.fillRect(14, 26, 1, 1);
+    g.generateTexture('eagle', 32, 32);
+    g.destroy();
   }
 }
