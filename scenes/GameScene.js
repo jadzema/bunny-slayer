@@ -56,8 +56,11 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.bunnies, this._killBunny, null, this);
 
     // Grass patch on levels 3, 6, 9 (0-indexed: 2, 5, 8)
+    // Level 1 (index 0) gets a test patch that grants the eagle button
     if ([2, 5, 8].includes(this.levelIndex)) {
-      this._spawnGrassPatch();
+      this._spawnGrassPatch(false);
+    } else if (this.levelIndex === 0) {
+      this._spawnGrassPatch(true);  // true = eagle test patch
     }
 
     // Eagle button (one-time use, earned after 3rd night mode)
@@ -82,7 +85,8 @@ class GameScene extends Phaser.Scene {
   }
 
   // ── Grass patch ──────────────────────────────────────────────────
-  _spawnGrassPatch() {
+  _spawnGrassPatch(eagleTest = false) {
+    this._patchIsEagleTest = eagleTest;
     let px, py, tries = 0;
     do {
       px = Phaser.Math.Between(80, 440);
@@ -93,9 +97,16 @@ class GameScene extends Phaser.Scene {
     this._patch = this.physics.add.staticImage(px, py, 'grass_patch').setDepth(3);
     this._patch.refreshBody();
 
-    // Pulsing glow halo
-    this._patchGlow = this.add.rectangle(px, py, 90, 48, 0x88ff88, 0.3).setDepth(2);
+    // Pulsing glow halo — gold tint for the eagle test patch
+    const glowColor = eagleTest ? 0xffdd44 : 0x88ff88;
+    this._patchGlow = this.add.rectangle(px, py, 90, 48, glowColor, 0.3).setDepth(2);
     this.tweens.add({ targets: this._patchGlow, alpha: 0.75, duration: 600, yoyo: true, repeat: -1 });
+
+    // Label the eagle test patch so the player knows what it does
+    if (eagleTest) {
+      this._patchLabel = this.add.text(px, py - 30, '🦅', { fontSize: '18px' })
+        .setOrigin(0.5).setDepth(4);
+    }
 
     this.physics.add.overlap(this.player, this._patch, this._onPatchHit, null, this);
 
@@ -105,17 +116,27 @@ class GameScene extends Phaser.Scene {
 
   _removePatch() {
     if (this._patch && this._patch.active) { this._patch.destroy(); this._patch = null; }
-    if (this._patchGlow) { this._patchGlow.destroy(); this._patchGlow = null; }
-    if (this._patchTimer) { this._patchTimer.remove(); this._patchTimer = null; }
+    if (this._patchGlow)  { this._patchGlow.destroy();  this._patchGlow  = null; }
+    if (this._patchLabel) { this._patchLabel.destroy(); this._patchLabel = null; }
+    if (this._patchTimer) { this._patchTimer.remove();  this._patchTimer = null; }
   }
 
   _onPatchHit() {
     if (!this._patch || !this._patch.active) return;
     const px = this._patch.x, py = this._patch.y;
+    const isEagleTest = this._patchIsEagleTest;
     this._removePatch();
-    this.patchCollected = true;
-    this._spawnBabyBunnies(px, py);
-    this._showNightMowGraphic();
+
+    if (isEagleTest) {
+      // Grant eagle button immediately for testing
+      this.eagleAvailable = true;
+      this.eagleUsed = false;
+      this._createEagleButton();
+    } else {
+      this.patchCollected = true;
+      this._spawnBabyBunnies(px, py);
+      this._showNightMowGraphic();
+    }
   }
 
   // ── Baby bunnies (bonus, 30% scale, auto-die after 2.5 s) ────────
