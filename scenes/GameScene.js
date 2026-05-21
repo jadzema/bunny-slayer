@@ -255,7 +255,10 @@ class GameScene extends Phaser.Scene {
   }
 
   _spawnBunnies() {
-    const { bunnies: count, bunnySpeed, aiMode } = this.cfg;
+    const { bunnies: count, aiMode } = this.cfg;
+    const bunnySpeed = this.nightMode
+      ? Math.round(this.cfg.bunnySpeed * 0.75)
+      : this.cfg.bunnySpeed;
     const placed = [];
     for (let i = 0; i < count; i++) {
       let x, y, tries = 0;
