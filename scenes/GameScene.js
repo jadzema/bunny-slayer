@@ -160,38 +160,40 @@ class GameScene extends Phaser.Scene {
     const bg = this.add.rectangle(270, 480, 540, 960, 0x000000, 0).setDepth(D);
 
     // Panel
-    const panel = this.add.rectangle(270, 480, 500, 480, 0x000022, 0).setDepth(D+1);
-    const rim   = this.add.rectangle(270, 480, 504, 484, 0x000000, 0)
+    const panel = this.add.rectangle(270, 480, 510, 660, 0x000022, 0).setDepth(D+1);
+    const rim   = this.add.rectangle(270, 480, 514, 664, 0x000000, 0)
                     .setStrokeStyle(2, 0x4444ff, 0).setDepth(D+1);
 
-    // Crescent moon decoration (top of panel)
-    const moon  = this.add.circle(270, 270, 32, 0xffffd0, 0).setDepth(D+2);
-    const moonC = this.add.circle(258, 263, 23, 0x000033, 0).setDepth(D+3);
-
-    // Image (centre of panel)
-    let artEl;
-    if (this.textures.exists('bonus_art')) {
-      artEl = this.add.image(270, 400, 'bonus_art')
-                .setDepth(D+2).setAlpha(0).setDisplaySize(420, 180);
-    } else {
-      artEl = this.add.rectangle(270, 400, 420, 180, 0x112244, 0.9)
-                .setDepth(D+2).setAlpha(0);
-    }
+    // Crescent moon decoration
+    const moon  = this.add.circle(270, 185, 28, 0xffffd0, 0).setDepth(D+2);
+    const moonC = this.add.circle(260, 179, 20, 0x000033, 0).setDepth(D+3);
 
     // "GENERATIONAL BUNNY WIPEOUT"
-    const wipeout = this.add.text(270, 530, 'GENERATIONAL\nBUNNY WIPEOUT', {
+    const wipeout = this.add.text(270, 260, 'GENERATIONAL\nBUNNY WIPEOUT', {
       fontSize: '20px', fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ff4444', stroke: '#000000', strokeThickness: 4,
       align: 'center', lineSpacing: 8,
     }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
 
     // "Night Mow Unlocked"
-    const unlocked = this.add.text(270, 630, 'Night Mow Unlocked', {
+    const unlocked = this.add.text(270, 350, 'Night Mow Unlocked', {
       fontSize: '14px', fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#aaaaff', stroke: '#000033', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
 
-    const all = [bg, panel, rim, moon, moonC, artEl, wipeout, unlocked];
+    // Image below text — scale to fit width (max 480px) preserving aspect ratio
+    let artEl;
+    if (this.textures.exists('bonus_art')) {
+      artEl = this.add.image(270, 580, 'bonus_art').setDepth(D+2).setAlpha(0);
+      const src = this.textures.get('bonus_art').getSourceImage();
+      const maxW = 480;
+      if (src.width > maxW) artEl.setScale(maxW / src.width);
+    } else {
+      artEl = this.add.rectangle(270, 580, 480, 200, 0x112244, 0.9)
+                .setDepth(D+2).setAlpha(0);
+    }
+
+    const all = [bg, panel, rim, moon, moonC, wipeout, unlocked, artEl];
     this.tweens.add({
       targets: all, alpha: 1, duration: 500,
       onComplete: () => {
