@@ -155,49 +155,47 @@ class GameScene extends Phaser.Scene {
   // ── Night Mow Bonus Round overlay ───────────────────────────────
   _showNightMowGraphic() {
     const D = 40;
-    const bg   = this.add.rectangle(270, 480, 540, 960, 0x000000, 0).setDepth(D);
-    const panel= this.add.rectangle(270, 430, 490, 340, 0x000022, 0).setDepth(D+1);
-    const rim  = this.add.rectangle(270, 430, 494, 344, 0x000000, 0)
-                   .setStrokeStyle(2, 0x4444ff, 0).setDepth(D+1);
 
-    const moon = this.add.circle(270, 310, 36, 0xffffd0, 0).setDepth(D+2);
-    this.add.circle(258, 302, 26, 0x000022, 0).setDepth(D+3); // crescent cut-out
+    // Dark full-screen veil
+    const bg = this.add.rectangle(270, 480, 540, 960, 0x000000, 0).setDepth(D);
 
-    const title = this.add.text(270, 368, 'NIGHT MOW', {
-      fontSize: '22px', fontFamily: '"Press Start 2P", "Courier New", monospace',
-      color: '#aaaaff', stroke: '#000033', strokeThickness: 4,
-    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+    // Panel
+    const panel = this.add.rectangle(270, 480, 500, 480, 0x000022, 0).setDepth(D+1);
+    const rim   = this.add.rectangle(270, 480, 504, 484, 0x000000, 0)
+                    .setStrokeStyle(2, 0x4444ff, 0).setDepth(D+1);
 
-    const sub = this.add.text(270, 408, 'BONUS ROUND!', {
-      fontSize: '18px', fontFamily: '"Press Start 2P", "Courier New", monospace',
-      color: '#ffff44', stroke: '#000000', strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+    // Crescent moon decoration (top of panel)
+    const moon  = this.add.circle(270, 270, 32, 0xffffd0, 0).setDepth(D+2);
+    const moonC = this.add.circle(258, 263, 23, 0x000033, 0).setDepth(D+3);
 
-    const wipeout = this.add.text(270, 446, 'GENERATIONAL\nBUNNY WIPEOUT', {
-      fontSize: '13px', fontFamily: '"Press Start 2P", "Courier New", monospace',
-      color: '#ff4444', stroke: '#000000', strokeThickness: 3,
-      align: 'center', lineSpacing: 6,
-    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
-
-    // Custom image or placeholder
+    // Image (centre of panel)
     let artEl;
     if (this.textures.exists('bonus_art')) {
-      artEl = this.add.image(270, 490, 'bonus_art')
-                .setDepth(D+2).setAlpha(0).setDisplaySize(260, 130);
+      artEl = this.add.image(270, 400, 'bonus_art')
+                .setDepth(D+2).setAlpha(0).setDisplaySize(420, 180);
     } else {
-      artEl = this.add.rectangle(270, 490, 260, 130, 0x112244, 0.9).setDepth(D+2).setAlpha(0);
-      this.add.text(270, 490,
-        'Add bonus_art.png\nto bunny-slayer folder\nand uncomment preload()',
-        { fontSize: '8px', fontFamily: '"Press Start 2P", "Courier New", monospace',
-          color: '#4466aa', align: 'center', lineSpacing: 6 }
-      ).setOrigin(0.5).setDepth(D+3).setAlpha(0);
+      artEl = this.add.rectangle(270, 400, 420, 180, 0x112244, 0.9)
+                .setDepth(D+2).setAlpha(0);
     }
 
-    const all = [bg, panel, rim, moon, title, sub, wipeout, artEl];
+    // "GENERATIONAL BUNNY WIPEOUT"
+    const wipeout = this.add.text(270, 530, 'GENERATIONAL\nBUNNY WIPEOUT', {
+      fontSize: '20px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#ff4444', stroke: '#000000', strokeThickness: 4,
+      align: 'center', lineSpacing: 8,
+    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+
+    // "Night Mow Unlocked"
+    const unlocked = this.add.text(270, 630, 'Night Mow Unlocked', {
+      fontSize: '14px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#aaaaff', stroke: '#000033', strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+
+    const all = [bg, panel, rim, moon, moonC, artEl, wipeout, unlocked];
     this.tweens.add({
       targets: all, alpha: 1, duration: 500,
       onComplete: () => {
-        this.time.delayedCall(3200, () => {
+        this.time.delayedCall(3500, () => {
           this.tweens.add({
             targets: all, alpha: 0, duration: 700,
             onComplete: () => all.forEach(o => o && o.destroy()),
