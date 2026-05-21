@@ -15,20 +15,20 @@ class GameScene extends Phaser.Scene {
     this.totalBunnies = this.cfg.bunnies;
 
     // Background
-    this.add.image(480, 270, 'grass');
+    this.add.image(270, 480, 'grass');
 
     // Fence border (visual only)
     this._drawFences();
 
     // Physics bounds inset from fence
-    this.physics.world.setBounds(26, 26, 908, 488);
+    this.physics.world.setBounds(26, 26, 488, 908);
 
     // Static obstacles
     this.obstacles = this.physics.add.staticGroup();
     this._spawnObstacles();
 
     // Player
-    this.player = new Player(this, 480, 270);
+    this.player = new Player(this, 270, 480);
     this.physics.add.collider(this.player, this.obstacles);
 
     // Bunnies
@@ -57,13 +57,13 @@ class GameScene extends Phaser.Scene {
   }
 
   _drawFences() {
-    for (let x = 0; x < 960; x += 32) {
+    for (let x = 0; x < 540; x += 32) {
       this.add.image(x + 16, 13,  'fence_h').setDepth(1);
-      this.add.image(x + 16, 527, 'fence_h').setDepth(1);
+      this.add.image(x + 16, 947, 'fence_h').setDepth(1);
     }
-    for (let y = 24; y < 516; y += 32) {
+    for (let y = 24; y < 936; y += 32) {
       this.add.image(13,  y + 16, 'fence_v').setDepth(1);
-      this.add.image(947, y + 16, 'fence_v').setDepth(1);
+      this.add.image(527, y + 16, 'fence_v').setDepth(1);
     }
   }
 
@@ -74,10 +74,10 @@ class GameScene extends Phaser.Scene {
     for (let i = 0; i < count; i++) {
       let x, y, tries = 0;
       do {
-        x = Phaser.Math.Between(70, 890);
-        y = Phaser.Math.Between(70, 470);
+        x = Phaser.Math.Between(70, 470);
+        y = Phaser.Math.Between(70, 890);
         tries++;
-      } while (Phaser.Math.Distance.Between(x, y, 480, 270) < 110 && tries < 30);
+      } while (Phaser.Math.Distance.Between(x, y, 270, 480) < 110 && tries < 30);
 
       const type = Phaser.Utils.Array.GetRandom(types);
       const obs  = this.obstacles.create(x, y, type);
@@ -94,11 +94,11 @@ class GameScene extends Phaser.Scene {
     for (let i = 0; i < count; i++) {
       let x, y, tries = 0;
       do {
-        x = Phaser.Math.Between(60, 900);
-        y = Phaser.Math.Between(60, 480);
+        x = Phaser.Math.Between(60, 480);
+        y = Phaser.Math.Between(60, 900);
         tries++;
       } while (tries < 40 && (
-        Phaser.Math.Distance.Between(x, y, 480, 270) < 90 ||
+        Phaser.Math.Distance.Between(x, y, 270, 480) < 90 ||
         placed.some(p => Phaser.Math.Distance.Between(x, y, p.x, p.y) < 44)
       ));
 

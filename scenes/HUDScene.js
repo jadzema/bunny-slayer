@@ -11,39 +11,39 @@ class HUDScene extends Phaser.Scene {
 
   create() {
     // Background bar
-    this.add.rectangle(480, 22, 960, 44, 0x000000, 0.72);
+    this.add.rectangle(270, 22, 540, 44, 0x000000, 0.72);
 
-    this.levelText = this.add.text(16, 10, `LEVEL ${this.levelNum}`, {
-      fontSize: '11px',
+    this.levelText = this.add.text(10, 10, `LEVEL ${this.levelNum}`, {
+      fontSize: '10px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 2,
     });
 
-    this.scoreText = this.add.text(240, 10, `SCORE: ${this.totalScore}`, {
-      fontSize: '11px',
+    this.scoreText = this.add.text(118, 10, `SCORE: ${this.totalScore}`, {
+      fontSize: '10px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffff44',
       stroke: '#000000',
       strokeThickness: 2,
     });
 
-    this.killsText = this.add.text(530, 10, `BUNNIES: ${this.kills}/${this.required}`, {
-      fontSize: '11px',
+    this.killsText = this.add.text(270, 10, `B: ${this.kills}/${this.required}`, {
+      fontSize: '10px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#aaffaa',
       stroke: '#000000',
       strokeThickness: 2,
-    });
+    }).setOrigin(0.5, 0);
 
-    this.timerText = this.add.text(900, 8, `${this.timeLeft}`, {
+    this.timerText = this.add.text(516, 8, `${this.timeLeft}`, {
       fontSize: '15px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 2,
-    }).setOrigin(0.5, 0);
+    }).setOrigin(1, 0);
 
     const gameScene = this.scene.get('Game');
     gameScene.events.on('score-update', (score) => {
@@ -52,7 +52,7 @@ class HUDScene extends Phaser.Scene {
     });
     gameScene.events.on('kills-update', (kills) => {
       this.kills = kills;
-      this.killsText.setText(`BUNNIES: ${kills}/${this.required}`);
+      this.killsText.setText(`B: ${kills}/${this.required}`);
     });
     gameScene.events.on('time-update', (time) => {
       this.timeLeft = time;

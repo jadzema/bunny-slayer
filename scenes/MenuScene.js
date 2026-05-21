@@ -2,16 +2,16 @@ class MenuScene extends Phaser.Scene {
   constructor() { super('Menu'); }
 
   create() {
-    this.add.image(480, 270, 'grass');
-    this.add.rectangle(480, 270, 960, 540, 0x000000, 0.65);
+    this.add.image(270, 480, 'grass');
+    this.add.rectangle(270, 480, 540, 960, 0x000000, 0.65);
 
     // Blood drip decorations
     for (let i = 0; i < 6; i++) {
-      const x = Phaser.Math.Between(40, 920);
+      const x = Phaser.Math.Between(40, 500);
       this.add.rectangle(x, Phaser.Math.Between(20, 70), 4, Phaser.Math.Between(25, 60), 0x990000, 0.7);
     }
 
-    this.add.text(480, 100, 'BUNNY', {
+    this.add.text(270, 160, 'BUNNY', {
       fontSize: '68px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ff2222',
@@ -19,7 +19,7 @@ class MenuScene extends Phaser.Scene {
       strokeThickness: 8,
     }).setOrigin(0.5);
 
-    this.add.text(480, 185, 'SLAYER', {
+    this.add.text(270, 250, 'SLAYER', {
       fontSize: '68px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ff2222',
@@ -27,7 +27,7 @@ class MenuScene extends Phaser.Scene {
       strokeThickness: 8,
     }).setOrigin(0.5);
 
-    this.add.text(480, 262, "Mow 'em down.", {
+    this.add.text(270, 335, "Mow 'em down.", {
       fontSize: '13px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#dddddd',
@@ -36,8 +36,8 @@ class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Instruction box
-    this.add.rectangle(480, 340, 600, 76, 0x000000, 0.5);
-    this.add.text(480, 340, 'DRAG JOYSTICK  -  Move mower\nKill all bunnies before time runs out', {
+    this.add.rectangle(270, 430, 500, 76, 0x000000, 0.5);
+    this.add.text(270, 430, 'DRAG JOYSTICK  -  Move mower\nKill all bunnies before time runs out', {
       fontSize: '10px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#bbbbbb',
@@ -55,12 +55,12 @@ class MenuScene extends Phaser.Scene {
       this.scene.start('Game', { levelIndex: 0, totalScore: 0 });
     };
 
-    const btnBg = this.add.rectangle(480, 438, 380, 54, 0x228822, 0.92)
+    const btnBg = this.add.rectangle(270, 560, 380, 54, 0x228822, 0.92)
       .setInteractive({ useHandCursor: true }).setDepth(20);
-    this.add.rectangle(480, 438, 376, 50, 0x000000, 0)
+    this.add.rectangle(270, 560, 376, 50, 0x000000, 0)
       .setStrokeStyle(2, 0x44ff44, 0.7).setDepth(21);
 
-    const btnText = this.add.text(480, 438, '▶  TAP TO START', {
+    const btnText = this.add.text(270, 560, '▶  TAP TO START', {
       fontSize: '16px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#ffffff',
@@ -72,7 +72,7 @@ class MenuScene extends Phaser.Scene {
 
     btnBg.on('pointerdown', startGame);
 
-    this.add.text(480, 500, 'or press ENTER on keyboard', {
+    this.add.text(270, 630, 'or press ENTER on keyboard', {
       fontSize: '8px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
       color: '#666666',

@@ -15,13 +15,13 @@ class BootScene extends Phaser.Scene {
   _createGrass() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
     const colors = [0x4a7c3f, 0x3d6b34, 0x518840, 0x467538];
-    for (let ty = 0; ty < 540; ty += 16) {
-      for (let tx = 0; tx < 960; tx += 16) {
+    for (let ty = 0; ty < 960; ty += 16) {
+      for (let tx = 0; tx < 540; tx += 16) {
         g.fillStyle(colors[((tx / 16 + ty / 16) % 4)]);
         g.fillRect(tx, ty, 16, 16);
       }
     }
-    g.generateTexture('grass', 960, 540);
+    g.generateTexture('grass', 540, 960);
     g.destroy();
   }
 
