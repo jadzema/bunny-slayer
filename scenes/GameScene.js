@@ -173,6 +173,12 @@ class GameScene extends Phaser.Scene {
       color: '#ffff44', stroke: '#000000', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
 
+    const wipeout = this.add.text(270, 446, 'GENERATIONAL\nBUNNY WIPEOUT', {
+      fontSize: '13px', fontFamily: '"Press Start 2P", "Courier New", monospace',
+      color: '#ff4444', stroke: '#000000', strokeThickness: 3,
+      align: 'center', lineSpacing: 6,
+    }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
+
     // Custom image or placeholder
     let artEl;
     if (this.textures.exists('bonus_art')) {
@@ -187,7 +193,7 @@ class GameScene extends Phaser.Scene {
       ).setOrigin(0.5).setDepth(D+3).setAlpha(0);
     }
 
-    const all = [bg, panel, rim, moon, title, sub, artEl];
+    const all = [bg, panel, rim, moon, title, sub, wipeout, artEl];
     this.tweens.add({
       targets: all, alpha: 1, duration: 500,
       onComplete: () => {
@@ -227,7 +233,7 @@ class GameScene extends Phaser.Scene {
   }
 
   _releaseEagles() {
-    const targets = this.bunnies.getChildren().filter(b => b.alive).slice(0, 3);
+    const targets = this.bunnies.getChildren().filter(b => b.alive).slice(0, 5);
     targets.forEach((target, i) => {
       this.time.delayedCall(i * 750, () => {
         if (!target.alive) return;
