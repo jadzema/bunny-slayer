@@ -1,7 +1,7 @@
 class VirtualJoystick {
   constructor(scene) {
     this.scene   = scene;
-    this.cx      = 120;   // base center in game coords
+    this.cx      = 420;   // base center in game coords
     this.cy      = 860;
     this.maxDist = 55;
     this.dx      = 0;

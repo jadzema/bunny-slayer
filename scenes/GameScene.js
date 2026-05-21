@@ -166,7 +166,7 @@ class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.over) return;
-    this.player.update();
+    this.player.update(delta);
     this.bunnies.getChildren().forEach(b => {
       if (b.active) b.update(time, delta, this.player);
     });
