@@ -181,15 +181,13 @@ class GameScene extends Phaser.Scene {
       color: '#aaaaff', stroke: '#000033', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
 
-    // Image below text — scale to fit width (max 480px) preserving aspect ratio
+    // Image below text
     let artEl;
     if (this.textures.exists('bonus_art')) {
-      artEl = this.add.image(270, 580, 'bonus_art').setDepth(D+2).setAlpha(0);
-      const src = this.textures.get('bonus_art').getSourceImage();
-      const maxW = 480;
-      if (src.width > maxW) artEl.setScale(maxW / src.width);
+      artEl = this.add.image(270, 580, 'bonus_art')
+                .setDepth(D+2).setAlpha(0).setDisplaySize(460, 220);
     } else {
-      artEl = this.add.rectangle(270, 580, 480, 200, 0x112244, 0.9)
+      artEl = this.add.rectangle(270, 580, 460, 220, 0x112244, 0.9)
                 .setDepth(D+2).setAlpha(0);
     }
 
