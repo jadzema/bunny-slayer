@@ -30,7 +30,7 @@ class Bunny extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(time, delta, player) {
-    if (!this.active) return;
+    if (!this.active || !this.alive) return;
 
     const dx   = this.x - player.x;
     const dy   = this.y - player.y;
@@ -98,17 +98,13 @@ class Bunny extends Phaser.Physics.Arcade.Sprite {
 
     if (this.hopTween) { this.hopTween.stop(); this.hopTween = null; }
 
+    // Freeze movement and tint red for pain
+    this.setVelocity(0, 0);
+    this.setTint(0xff5555);
+
     GameAudio.playKill();
 
-    const splat = scene.add.image(this.x, this.y, 'splat').setDepth(4);
-    scene.tweens.add({
-      targets: splat,
-      alpha: 0,
-      delay: 9000,
-      duration: 1000,
-      onComplete: () => splat.destroy(),
-    });
-
+    // +100 popup appears immediately
     const popup = scene.add.text(this.x, this.y - 8, '+100', {
       fontSize: '13px',
       fontFamily: '"Press Start 2P", "Courier New", monospace',
@@ -126,10 +122,29 @@ class Bunny extends Phaser.Physics.Arcade.Sprite {
       onComplete: () => popup.destroy(),
     });
 
-    // Defer body disable by one frame so that any other bunnies overlapping the
-    // player in this same physics step still get their own overlap callback.
-    scene.time.delayedCall(16, () => {
-      if (this.active) this.disableBody(true, true);
+    // Wiggle in pain for ~2 seconds, then drop splat and disappear
+    const bx = this.x;
+    const by = this.y;
+    scene.tweens.add({
+      targets: this,
+      angle: { from: -10, to: 10 },
+      duration: 80,
+      yoyo: true,
+      repeat: 12,
+      ease: 'Sine.InOut',
+      onComplete: () => {
+        // Splat at the bunny's final position
+        const splat = scene.add.image(bx, by, 'splat').setDepth(4);
+        scene.tweens.add({
+          targets: splat,
+          alpha: 0,
+          delay: 9000,
+          duration: 1000,
+          onComplete: () => splat.destroy(),
+        });
+
+        if (this.active) this.disableBody(true, true);
+      },
     });
   }
 }

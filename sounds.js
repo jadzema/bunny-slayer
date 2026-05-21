@@ -81,7 +81,7 @@ window.GameAudio = {
   playKill() {
     this._ensureCtx();
     this._playCrunch();
-    setTimeout(() => this._playSqueal(), 85);
+    setTimeout(() => this._playPainSqueal(), 85);
   },
 
   _playCrunch() {
@@ -108,30 +108,39 @@ window.GameAudio = {
     src.start();
   },
 
-  _playSqueal() {
+  _playPainSqueal() {
+    // Three diminishing cries spaced 0.65s apart — total ~2 seconds
+    const cries = [
+      { offset: 0,    startFreq: 1200, endFreq: 320, vol: 0.28, dur: 0.52 },
+      { offset: 0.65, startFreq: 980,  endFreq: 260, vol: 0.18, dur: 0.46 },
+      { offset: 1.30, startFreq: 760,  endFreq: 200, vol: 0.10, dur: 0.40 },
+    ];
+
     const now = this.ctx.currentTime;
+    cries.forEach(cry => {
+      const t = now + cry.offset;
 
-    const osc  = this.ctx.createOscillator();
-    osc.type   = 'sine';
-    osc.frequency.setValueAtTime(1150, now);
-    osc.frequency.exponentialRampToValueAtTime(260, now + 0.38);
+      const osc = this.ctx.createOscillator();
+      osc.type  = 'sine';
+      osc.frequency.setValueAtTime(cry.startFreq, t);
+      osc.frequency.exponentialRampToValueAtTime(cry.endFreq, t + cry.dur);
 
-    // Tremolo on the squeal
-    const trem = this.ctx.createOscillator();
-    trem.frequency.value = 20;
-    const tremGain = this.ctx.createGain();
-    tremGain.gain.value = 45;
-    trem.connect(tremGain);
-    tremGain.connect(osc.frequency);
+      const trem = this.ctx.createOscillator();
+      trem.frequency.value = 22;
+      const tremGain = this.ctx.createGain();
+      tremGain.gain.value = 38;
+      trem.connect(tremGain);
+      tremGain.connect(osc.frequency);
 
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.24, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(cry.vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + cry.dur);
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    trem.start(now); osc.start(now);
-    osc.stop(now + 0.39); trem.stop(now + 0.39);
+      trem.start(t); osc.start(t);
+      osc.stop(t + cry.dur + 0.01); trem.stop(t + cry.dur + 0.01);
+    });
   },
 };
