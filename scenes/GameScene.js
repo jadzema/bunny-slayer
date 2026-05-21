@@ -219,6 +219,7 @@ class GameScene extends Phaser.Scene {
       if (this.eagleUsed) return;
       this.eagleUsed = true;
       this._eagleBtn.destroy(); this._eagleLbl.destroy(); this._eagleSub.destroy();
+      GameAudio.playEagleCall(true);   // loud activation screech
       this._releaseEagles();
     };
     this._eagleBtn.on('pointerdown', fire);
@@ -233,6 +234,7 @@ class GameScene extends Phaser.Scene {
         const fromLeft = (i % 2 === 0);
         const startX = fromLeft ? -40 : 580;
         const startY = Phaser.Math.Between(150, 700);
+        GameAudio.playEagleCall(false);  // attack screech per eagle
         const eagle  = this.add.image(startX, startY, 'eagle').setDepth(15).setScale(1.6);
         this.tweens.add({
           targets: eagle, x: target.x, y: target.y, duration: 750, ease: 'Power2.In',

@@ -108,6 +108,57 @@ window.GameAudio = {
     src.start();
   },
 
+  // Eagle call — loud=true for button activation, false for each attack swoop
+  playEagleCall(loud = false) {
+    this._ensureCtx();
+    const now = this.ctx.currentTime;
+    const vol = loud ? 0.38 : 0.24;
+    const dur = loud ? 0.75 : 0.50;
+
+    // Main sawtooth — sharp, raptor-like descending cry
+    const osc = this.ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(loud ? 2400 : 2000, now);
+    osc.frequency.exponentialRampToValueAtTime(loud ? 650 : 850, now + dur);
+
+    // Bandpass filter gives it a piercing bird-of-prey quality
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 2.8;
+
+    // Fast vibrato (raptor tremolo)
+    const vib = this.ctx.createOscillator();
+    vib.frequency.value = 16;
+    const vibGain = this.ctx.createGain();
+    vibGain.gain.value = 55;
+    vib.connect(vibGain);
+    vibGain.connect(osc.frequency);
+
+    // Short crackle layer for edge
+    const osc2 = this.ctx.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(loud ? 1200 : 1000, now);
+    osc2.frequency.exponentialRampToValueAtTime(300, now + dur * 0.6);
+    const gain2 = this.ctx.createGain();
+    gain2.gain.setValueAtTime(vol * 0.18, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + dur * 0.6);
+    osc2.connect(gain2);
+    gain2.connect(this.ctx.destination);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    vib.start(now); osc.start(now); osc2.start(now);
+    osc.stop(now + dur + 0.01); vib.stop(now + dur + 0.01);
+    osc2.stop(now + dur * 0.6 + 0.01);
+  },
+
   _playPainSqueal() {
     // Three diminishing cries spaced 0.65s apart — total ~2 seconds
     const cries = [
