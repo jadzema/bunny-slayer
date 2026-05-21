@@ -2,10 +2,11 @@ class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   preload() {
-    this.load.image('bonus_art', 'bonus_art.jpg');
-    this.load.on('loaderror', (file) => {
-      console.warn('Failed to load:', file.src);
-    });
+    // Loaded from embedded base64 (bonus_art_data.js) so it works on
+    // both file:// and GitHub Pages without CORS issues.
+    if (window.BONUS_ART_DATA) {
+      this.load.image('bonus_art', window.BONUS_ART_DATA);
+    }
   }
 
   create() {
