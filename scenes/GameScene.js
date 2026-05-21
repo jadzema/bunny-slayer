@@ -154,6 +154,7 @@ class GameScene extends Phaser.Scene {
 
   // ── Night Mow Bonus Round overlay ───────────────────────────────
   _showNightMowGraphic() {
+    console.log('_showNightMowGraphic called');
     const D = 40;
 
     // Dark full-screen veil
@@ -182,14 +183,10 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(D+2).setAlpha(0);
 
     // Image below text
-    let artEl;
-    if (this.textures.exists('bonus_art')) {
-      artEl = this.add.image(270, 590, 'bonus_art')
-                .setDepth(D+2).setAlpha(0).setDisplaySize(260, 330);
-    } else {
-      artEl = this.add.rectangle(270, 580, 460, 220, 0x112244, 0.9)
-                .setDepth(D+2).setAlpha(0);
-    }
+    console.log('bonus_art exists:', this.textures.exists('bonus_art'));
+    console.log('all texture keys:', this.textures.getTextureKeys());
+    const artEl = this.add.image(270, 590, 'bonus_art')
+                    .setDepth(D+2).setAlpha(0).setDisplaySize(260, 330);
 
     const all = [bg, panel, rim, moon, moonC, wipeout, unlocked, artEl];
     this.tweens.add({
